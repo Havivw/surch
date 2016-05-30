@@ -34,8 +34,8 @@ class Organization(object):
             self,
             search_list,
             organization,
-            git_user,
-            git_password,
+            git_user=None,
+            git_password=None,
             print_result=False,
             organization_flag=True,
             repos_to_skip=None,
@@ -171,9 +171,9 @@ class Organization(object):
                         consolidate_log=True,
                         verbose=self.verbose)
         if self.remove_cloned_dir:
-            utils.remove_repos_folder(path=self.cloned_repos_path)
+            utils.remove_folder(path=self.cloned_repos_path)
         if self.print_result:
-            utils.print_result(self.results_file_path)
+            utils.print_result_file(self.results_file_path)
 
 
 def search(

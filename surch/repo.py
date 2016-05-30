@@ -206,12 +206,12 @@ class Repo(object):
             utils.remove_folder(path=self.repo_path)
         total_time = utils.convert_to_seconds(start, time())
         if self.error_summary:
-            utils.print_results_summary(self.error_summary, lgr)
+            utils.print_results_summary(self.error_summary)
         lgr.info('Found {0} results in {1} commits.'.format(
             self.results, self.commits))
         lgr.debug('Total time: {0} seconds'.format(total_time))
         if self.print_result:
-            utils.print_result(self.results_file_path)
+            utils.print_result_file(self.results_file_path)
 
 
 def search(

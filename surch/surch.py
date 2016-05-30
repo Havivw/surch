@@ -42,8 +42,8 @@ def main():
               help='Remove clones repos')
 @click.option('--print-result', default=False, is_flag=True)
 @click.option('-v', '--verbose', default=False, is_flag=True)
-def surch_repo(repo_url, config_file, string, print_result,
-               remove, cloned_repo_dir, log, verbose):
+def surch_repo(repo_url, config_file, string, print_result, remove,
+               cloned_repo_dir, log, verbose):
     """Search a single repository
     """
 

@@ -47,7 +47,7 @@ def print_results_summary(error_summary):
         '\n'.join(error_summary)))
 
 
-def print_result(result_file=None):
+def print_result_file(result_file=None):
     with open(result_file) as results_file:
         results = results_file.read()
     lgr.info(results)

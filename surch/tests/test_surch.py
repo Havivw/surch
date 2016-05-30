@@ -74,7 +74,7 @@ class TestRepo(testtools.TestCase):
         self.assertTrue(success)
 
     def surch_repo_command_with_conf_file(self):
-        self.args = 'https://github.com/cloudify-cosmo/surch.git'
+        self.args = 'None'
         opts = {
             '-c': './config/repo-config.yaml',
             '-v': None}
@@ -184,4 +184,47 @@ class TestUtils(testtools.TestCase):
         success = True if os.path.isfile('./test.json.surch') else False
         if success:
             os.remove('./test.json.surch')
+        self.assertTrue(success)
+
+
+class TestOrg(testtools.TestCase):
+    def surch_org_command_find_strings(self):
+        self.args = 'cloudify-cosmo'
+        opts = {
+            '-s': 'import',
+            '-p': './test',
+            '-l': './test',
+            '--repos=': 'surch',
+            '-v': None}
+        result = _invoke_click('surch_org', [self.args], opts)
+        self.assertEqual('<Result okay>', str(result))
+        dicts_num = count_dicts_in_results_file(
+            './test/cloudify-cosmo/results.json')
+        success = True if dicts_num > 0 else False
+        self.assertTrue(success)
+
+    def surch_org_command_with_conf_file(self):
+        self.args = 'None'
+        opts = {
+            '-c': './config/org-config_no_auth.yaml',
+            '-v': None}
+        result = _invoke_click('surch_org', [self.args], opts)
+        self.assertEqual('<Result okay>', str(result))
+        result_path = os.path.join(var.RESULTS_PATH,
+                                   'cloudify-cosmo/results.json')
+        dicts_num = count_dicts_in_results_file(result_path)
+        success = True if dicts_num > 0 else False
+        self.assertTrue(success)
+
+    def surch_org_command_with_conf_file_auth(self):
+        self.args = 'None'
+        opts = {
+            '-c': './config/org-config.yaml',
+            '-v': None}
+        result = _invoke_click('surch_org', [self.args], opts)
+        self.assertEqual('<Result okay>', str(result))
+        result_path = os.path.join(var.RESULTS_PATH,
+                                   'cloudify-cosmo/results.json')
+        dicts_num = count_dicts_in_results_file(result_path)
+        success = True if dicts_num > 0 else False
         self.assertTrue(success)
