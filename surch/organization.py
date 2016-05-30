@@ -39,7 +39,6 @@ class Organization(object):
             print_result=False,
             organization_flag=True,
             repos_to_skip=None,
-            repos_to_check=None,
             consolidate_log=False,
             cloned_repos_path=constants.CLONED_REPOS_PATH,
             results_dir=constants.RESULTS_PATH,
@@ -52,12 +51,8 @@ class Organization(object):
         self.search_list = search_list
         self.organization = organization
         self.results_dir = results_dir
-        if repos_to_skip and repos_to_check:
-            lgr.warn("Can't run surch with list of exclude and includes repo ")
-            sys.exit(1)
         self.repos_to_skip = repos_to_skip or []
-        self.repos_to_check = repos_to_check or []
-        if not git_user or not git_password:
+        if not git_user or not git_user:
             lgr.warn(
                 'Choosing not to provide GitHub credentials limits '
                 'requests to GitHub to 60/h. This might affect cloning.')
@@ -148,8 +143,7 @@ class Organization(object):
         self.cloned_repos_path = os.path.join(self.organization,
                                               self.cloned_repos_path)
         for repository_data in self.repository_specific_data:
-            if (repository_data['name'] not in self.repos_to_skip) or\
-                    (repository_data['name'] in self.repos_to_check):
+            if repository_data['name'] not in self.repos_to_skip:
                 repo.search(
                     search_list=search_list,
                     repo_url=repository_data[url_type],
