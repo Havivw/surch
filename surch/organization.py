@@ -39,6 +39,7 @@ class Organization(object):
             print_result=False,
             organization_flag=True,
             repos_to_skip=None,
+            repos_to_check=None,
             consolidate_log=False,
             cloned_repos_path=constants.CLONED_REPOS_PATH,
             results_dir=constants.RESULTS_PATH,
@@ -51,8 +52,12 @@ class Organization(object):
         self.search_list = search_list
         self.organization = organization
         self.results_dir = results_dir
+        if repos_to_skip and repos_to_check:
+            lgr.warn("Can't run surch with list of exclude and includes repo ")
+            sys.exit(1)
         self.repos_to_skip = repos_to_skip or []
-        if not git_user or not git_user:
+        self.repos_to_check = repos_to_check or []
+        if not git_user or not git_password:
             lgr.warn(
                 'Choosing not to provide GitHub credentials limits '
                 'requests to GitHub to 60/h. This might affect cloning.')
@@ -143,7 +148,8 @@ class Organization(object):
         self.cloned_repos_path = os.path.join(self.organization,
                                               self.cloned_repos_path)
         for repository_data in self.repository_specific_data:
-            if repository_data['name'] not in self.repos_to_skip:
+            if (repository_data['name'] not in self.repos_to_skip) or\
+                    (repository_data['name'] in self.repos_to_check):
                 repo.search(
                     search_list=search_list,
                     repo_url=repository_data[url_type],
@@ -154,7 +160,7 @@ class Organization(object):
                     consolidate_log=True,
                     verbose=self.verbose)
         if self.remove_cloned_dir:
-            utils.remove_repos_folder(path=self.cloned_repos_path)
+            utils.remove_folder(path=self.cloned_repos_path)
         if self.print_result:
             utils.print_result(self.results_file_path)
 

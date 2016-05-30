@@ -80,7 +80,6 @@ class Repo(object):
         """This method check if the repo exist in the
         path and run clone or pull
         """
-
         def run(command):
             try:
                 proc = subprocess.Popen(
@@ -204,7 +203,7 @@ class Repo(object):
         results = self._search(search_list, commits)
         self._write_results(results)
         if self.remove_cloned_dir:
-            utils.remove_repos_folder(path=self.cloned_repo_dir)
+            utils.remove_folder(path=self.repo_path)
         total_time = utils.convert_to_seconds(start, time())
         if self.error_summary:
             utils.print_results_summary(self.error_summary, lgr)

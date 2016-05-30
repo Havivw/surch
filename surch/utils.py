@@ -37,12 +37,12 @@ def read_config_file(config_file, verbose=False, remove_cloned_dir=False,
     return conf_vars
 
 
-def remove_repos_folder(path=None):
+def remove_folder(path=None):
     lgr.info('Removing: {0}...'.format(path))
     shutil.rmtree(path)
 
 
-def print_results_summary(error_summary, lgr):
+def print_results_summary(error_summary):
     lgr.info('Summary of all errors: \n{0}'.format(
         '\n'.join(error_summary)))
 
