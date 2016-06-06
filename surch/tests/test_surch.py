@@ -1,5 +1,5 @@
 ########
-# Copyright (c) 2014 GigaSpaces Technologies Ltd. All rights reserved
+# Copyright (c) 2016 GigaSpaces Technologies Ltd. All rights reserved
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -16,22 +16,15 @@
 import os
 import json
 import mock
-# import git
-# import shutil
-# import tarfile
-# import tempfile
-# import subprocess
-# from contextlib import closing
+
 
 import testtools
 import click.testing as clicktest
 
 from surch import utils
-import surch.surch as surch
-from surch import constants as var
 from surch import repo
-# import surch.utils as utils
-# import surch.organization as organization
+from surch import constants
+import surch.surch as surch
 
 
 def _invoke_click(func, args=None, opts=None):
@@ -45,6 +38,7 @@ def _invoke_click(func, args=None, opts=None):
         else:
             opts_and_args.append(opt)
     return clicktest.CliRunner().invoke(getattr(surch, func), opts_and_args)
+
 
 def count_dicts_in_results_file(file_path):
     i = 0
@@ -60,7 +54,7 @@ def count_dicts_in_results_file(file_path):
 
 
 class TestRepo(testtools.TestCase):
-    def surch_repo_command_find_strings(self):
+    def test_surch_repo_command_with_arguments_and_found_results(self):
         self.args = 'https://github.com/cloudify-cosmo/surch.git'
         opts = {
             '-s': 'import',
@@ -73,19 +67,19 @@ class TestRepo(testtools.TestCase):
         success = True if dicts_num > 0 else False
         self.assertTrue(success)
 
-    def surch_repo_command_with_conf_file(self):
+    def test_surch_repo_command_with_config_and_found_results(self):
         self.args = 'None'
         opts = {
             '-c': './config/repo-config.yaml',
             '-v': None}
         _invoke_click('surch_repo', [self.args], opts)
-        result_path = os.path.join(var.RESULTS_PATH,
+        result_path = os.path.join(constants.RESULTS_PATH,
                                    'cloudify-cosmo/results.json')
         dicts_num = count_dicts_in_results_file(result_path)
         success = True if dicts_num > 0 else False
         self.assertTrue(success)
 
-    def surch_repo_command_find_strings_and_remove(self):
+    def test_surch_repo_command_with_arguments_found_results_and_remove(self):
         self.args = 'https://github.com/cloudify-cosmo/surch.git'
         opts = {
             '-s': 'import',
@@ -99,7 +93,7 @@ class TestRepo(testtools.TestCase):
         self.assertTrue(success)
         self.assertFalse(os.path.isdir('./test/clones/cloudify-cosmo/surch'))
 
-    def surch_repo_command_no_string_option(self):
+    def test_surch_repo_command_with_arguments_without_string_opt(self):
         self.args = 'https://github.com/cloudify-cosmo/surch.git'
         opts = {
             '-p': './test',
@@ -111,17 +105,18 @@ class TestRepo(testtools.TestCase):
         success = True if dicts_num > 0 else False
         self.assertFalse(success)
 
-    def check_create_search_string(self):
+    def test_create_search_strings(self):
         search_list = repo.Repo._create_search_string(['a', 'b', 'c'])
         success = \
             True if search_list == "'a' --or -e 'b' --or -e 'c'" else False
         self.assertTrue(success)
 
-    def check_clone_or_pull(self):
+    def test_clone_or_pull(self):
         repo_class = repo.Repo(
             repo_url='https://github.com/cloudify-cosmo/surch.git',
             search_list=['a', 'b', 'c'])
-        repo_path = os.path.join(var.CLONED_REPOS_PATH, 'cloudify-cosmo/surch')
+        repo_path = os.path.join(constants.CLONED_REPOS_PATH,
+                                 'cloudify-cosmo/surch')
         if os.path.isdir(repo_path):
             repo_class._clone_or_pull()
             self.assertTrue(os.path.isdir(repo_path))
@@ -129,11 +124,12 @@ class TestRepo(testtools.TestCase):
         repo_class._clone_or_pull()
         self.assertTrue(os.path.isdir(repo_path))
 
-    def check_get_all_commits(self):
+    def test_get_all_commits(self):
         repo_class = repo.Repo(
             repo_url='https://github.com/cloudify-cosmo/surch.git',
             search_list=['a', 'b', 'c'])
-        repo_path = os.path.join(var.CLONED_REPOS_PATH, 'cloudify-cosmo/surch')
+        repo_path = os.path.join(constants.CLONED_REPOS_PATH,
+                                 'cloudify-cosmo/surch')
         if not os.path.isdir(repo_path):
             repo_class._clone_or_pull()
         commits = repo_class._get_all_commits()
@@ -142,11 +138,11 @@ class TestRepo(testtools.TestCase):
 
     @mock.patch.object(repo.Repo, '_get_user_details',
                        mock.Mock(return_value=('surch', 'surch', 'surch')))
-    def check_write_results(self):
+    def test_write_results(self):
         repo_class = repo.Repo(
             repo_url='https://github.com/cloudify-cosmo/surch.git',
             search_list=['a', 'b', 'c'])
-        result_path = os.path.join(var.RESULTS_PATH,
+        result_path = os.path.join(constants.RESULTS_PATH,
                                    'cloudify-cosmo/results.json')
         repo_class._write_results(
             [['189e57105a3eab4bf6b1ac6accd522d6f4b8bb93:README.md',
@@ -188,7 +184,8 @@ class TestUtils(testtools.TestCase):
 
 
 class TestOrg(testtools.TestCase):
-    def surch_org_command_find_strings(self):
+
+    def test_surch_org_command_with_arguments_and_found_results(self):
         self.args = 'cloudify-cosmo'
         opts = {
             '-s': 'import',
@@ -203,27 +200,27 @@ class TestOrg(testtools.TestCase):
         success = True if dicts_num > 0 else False
         self.assertTrue(success)
 
-    def surch_org_command_with_conf_file(self):
+    def test_surch_org_command_with_config_no_auth_and_found_results(self):
         self.args = 'None'
         opts = {
             '-c': './config/org-config_no_auth.yaml',
             '-v': None}
         result = _invoke_click('surch_org', [self.args], opts)
         self.assertEqual('<Result okay>', str(result))
-        result_path = os.path.join(var.RESULTS_PATH,
+        result_path = os.path.join(constants.RESULTS_PATH,
                                    'cloudify-cosmo/results.json')
         dicts_num = count_dicts_in_results_file(result_path)
         success = True if dicts_num > 0 else False
         self.assertTrue(success)
 
-    def surch_org_command_with_conf_file_auth(self):
+    def test_surch_org_command_with_config_with_auth_and_found_results(self):
         self.args = 'None'
         opts = {
             '-c': './config/org-config.yaml',
             '-v': None}
         result = _invoke_click('surch_org', [self.args], opts)
         self.assertEqual('<Result okay>', str(result))
-        result_path = os.path.join(var.RESULTS_PATH,
+        result_path = os.path.join(constants.RESULTS_PATH,
                                    'cloudify-cosmo/results.json')
         dicts_num = count_dicts_in_results_file(result_path)
         success = True if dicts_num > 0 else False
