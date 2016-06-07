@@ -19,6 +19,7 @@ import logging
 
 import requests
 
+from plugins import handler
 from . import logger, repo, utils, constants
 
 lgr = logger.init()
@@ -29,8 +30,10 @@ class Organization(object):
             self,
             search_list,
             organization,
+            source=None,
             verbose=False,
             git_user=None,
+            config_file=None,
             results_dir=None,
             git_password=None,
             print_result=False,
@@ -46,8 +49,13 @@ class Organization(object):
         lgr.setLevel(logging.DEBUG if verbose else logging.INFO)
 
         utils.check_if_cmd_exists_else_exit('git')
-        self.print_result = print_result
+        self.config_file = config_file if config_file else None
+        self.source = handler.plugins_handle(config_file=self.config_file,
+                                             plugins_list=source)
+        if 'vault' in self.source:
+            search_list = handler.vault_trigger(config_file=self.config_file)
         self.search_list = search_list
+        self.print_result = print_result
         self.organization = organization
         self.results_dir = results_dir
         if repos_to_skip and repos_to_check:
@@ -77,11 +85,13 @@ class Organization(object):
     @classmethod
     def init_with_config_file(cls,
                               config_file,
+                              source=None,
                               verbose=False,
                               print_result=False,
                               is_organization=True,
                               remove_cloned_dir=False):
-        conf_vars = utils.read_config_file(verbose=verbose,
+        conf_vars = utils.read_config_file(source=source,
+                                           verbose=verbose,
                                            config_file=config_file,
                                            print_result=print_result,
                                            is_organization=is_organization,
@@ -176,6 +186,7 @@ class Organization(object):
 def search(
         search_list,
         organization,
+        source=None,
         verbose=False,
         git_user=None,
         config_file=None,
@@ -190,9 +201,12 @@ def search(
         **kwargs):
 
     utils.check_if_cmd_exists_else_exit('git')
+    source = handler.plugins_handle(config_file=config_file,
+                                    plugins_list=source)
 
     if config_file:
         org = Organization.init_with_config_file(
+            source=source,
             verbose=verbose,
             config_file=config_file,
             print_result=print_result,
@@ -200,6 +214,7 @@ def search(
             remove_cloned_dir=remove_cloned_dir)
     else:
         org = Organization(
+            source=source,
             verbose=verbose,
             git_user=git_user,
             search_list=search_list,

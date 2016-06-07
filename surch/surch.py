@@ -36,6 +36,8 @@ def main():
 @click.option('-p', '--cloned-repo-dir', default=constants.CLONED_REPOS_PATH,
               help='Directory to clone repository to. '
               '[defaults to {0}]'.format(constants.CLONED_REPOS_PATH))
+@click.option('--source', multiple=True, default=[],
+              help='source plugins(Vault).')
 @click.option('-l', '--log', default=constants.RESULTS_PATH,
               help='All results will be logged to this directory. '
               '[defaults to {0}]'.format(constants.RESULTS_PATH))
@@ -44,7 +46,7 @@ def main():
                    'When used -p and -l can\'t be same folder')
 @click.option('--print-result', default=False, is_flag=True)
 @click.option('-v', '--verbose', default=False, is_flag=True)
-def surch_repo(repo_url, config_file, string, print_result,
+def surch_repo(repo_url, config_file, string, print_result, source,
                remove, cloned_repo_dir, log, verbose):
     """Search a single repository
     """
@@ -52,6 +54,7 @@ def surch_repo(repo_url, config_file, string, print_result,
     logger.configure()
 
     repo.search(
+        source=source,
         results_dir=log,
         verbose=verbose,
         repo_url=repo_url,
@@ -76,6 +79,8 @@ def surch_repo(repo_url, config_file, string, print_result,
 @click.option('--repos', default='', multiple=True,
               help='Repo you would like to include. '
               'This can be passed multiple times.')
+@click.option('--source', multiple=True, default=[],
+              help='source plugins(Vault).')
 @click.option('-U', '--user', default=None,
               help='Git user name for authenticate.')
 @click.option('-P', '--password', default=None, required=False,
@@ -91,7 +96,7 @@ def surch_repo(repo_url, config_file, string, print_result,
                    'When used -p and -l can\'t be same folder')
 @click.option('--print-result', default=False, is_flag=True)
 @click.option('-v', '--verbose', default=False, is_flag=True)
-def surch_org(organization_name, config_file, string, skip, repos, user,
+def surch_org(organization_name, config_file, string, skip, repos, user, source,
               print_result, remove, password, cloned_repos_path, log, verbose):
     """Search all or some repositories in an organization
     """
@@ -99,6 +104,7 @@ def surch_org(organization_name, config_file, string, skip, repos, user,
     logger.configure()
 
     organization.search(
+        source=source,
         git_user=user,
         results_dir=log,
         verbose=verbose,
@@ -127,6 +133,8 @@ def surch_org(organization_name, config_file, string, skip, repos, user,
 @click.option('--repos', default='', multiple=True,
               help='Repo you would like to include. '
               'This can be passed multiple times.')
+@click.option('--source', multiple=True, default=[],
+              help='source plugins(Vault).')
 @click.option('-U', '--user', default=None,
               help='Git user name for authenticate.')
 @click.option('-P', '--password', default=None, required=False,
@@ -143,7 +151,7 @@ def surch_org(organization_name, config_file, string, skip, repos, user,
 @click.option('--print-result', default=False, is_flag=True)
 @click.option('-v', '--verbose', default=False, is_flag=True)
 def surch_user(organization_name, config_file, string, skip, repos, user,
-               remove, password, cloned_repos_path, log, print_result,
+               source, remove, password, cloned_repos_path, log, print_result,
                verbose):
     """Search all or some repositories for a user
     """
@@ -151,6 +159,7 @@ def surch_user(organization_name, config_file, string, skip, repos, user,
     logger.configure()
 
     organization.search(
+        source=source,
         git_user=user,
         results_dir=log,
         verbose=verbose,
