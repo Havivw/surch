@@ -30,7 +30,7 @@ def main():
 @click.option('-c', '--config-file', default=None,
               type=click.Path(exists=False, file_okay=True),
               help='A path to a Surch config file')
-@click.option('-s', '--string', multiple=True,
+@click.option('-s', '--string', multiple=True, required=False,
               help='String you would like to search for. '
               'This can be passed multiple times.')
 @click.option('-p', '--cloned-repo-dir', default=constants.CLONED_REPOS_PATH,
@@ -70,7 +70,7 @@ def surch_repo(repo_url, config_file, string, print_result, source,
 @click.option('-c', '--config-file', default=None,
               type=click.Path(exists=False, file_okay=True),
               help='A path to a Surch config file')
-@click.option('-s', '--string', multiple=True,
+@click.option('-s', '--string', multiple=True, required=False,
               help='String you would like to search for. '
                    'This can be passed multiple times.')
 @click.option('--skip', default='', multiple=True,
@@ -85,7 +85,7 @@ def surch_repo(repo_url, config_file, string, print_result, source,
               help='Git user name for authenticate.')
 @click.option('-P', '--password', default=None, required=False,
               help='Git user password for authenticate')
-@click.option('-p', '--cloned-repos-path', default=constants.CLONED_REPOS_PATH,
+@click.option('-p', '--cloned-repos-dir', default=constants.CLONED_REPOS_PATH,
               help='Directory to contain all cloned repositories. '
               '[defaults to {0}]'.format(constants.CLONED_REPOS_PATH))
 @click.option('-l', '--log', default=constants.RESULTS_PATH,
@@ -97,7 +97,7 @@ def surch_repo(repo_url, config_file, string, print_result, source,
 @click.option('--print-result', default=False, is_flag=True)
 @click.option('-v', '--verbose', default=False, is_flag=True)
 def surch_org(organization_name, config_file, string, skip, repos, user, source,
-              print_result, remove, password, cloned_repos_path, log, verbose):
+              print_result, remove, password, cloned_repos_dir, log, verbose):
     """Search all or some repositories in an organization
     """
 
@@ -116,7 +116,7 @@ def surch_org(organization_name, config_file, string, skip, repos, user, source,
         search_list=list(string),
         print_result=print_result,
         organization=organization_name,
-        cloned_repos_path=cloned_repos_path)
+        cloned_repos_dir=cloned_repos_dir)
 
 
 @main.command(name='user')
@@ -139,7 +139,7 @@ def surch_org(organization_name, config_file, string, skip, repos, user, source,
               help='Git user name for authenticate.')
 @click.option('-P', '--password', default=None, required=False,
               help='Git user password for authenticate')
-@click.option('-p', '--cloned-repos-path', default=constants.CLONED_REPOS_PATH,
+@click.option('-p', '--cloned-repos-dir', default=constants.CLONED_REPOS_PATH,
               help='Directory to contain all cloned repositories. '
               '[defaults to {0}]'.format(constants.CLONED_REPOS_PATH))
 @click.option('-l', '--log', default=constants.RESULTS_PATH,
@@ -151,7 +151,7 @@ def surch_org(organization_name, config_file, string, skip, repos, user, source,
 @click.option('--print-result', default=False, is_flag=True)
 @click.option('-v', '--verbose', default=False, is_flag=True)
 def surch_user(organization_name, config_file, string, skip, repos, user,
-               source, remove, password, cloned_repos_path, log, print_result,
+               source, remove, password, cloned_repos_dir, log, print_result,
                verbose):
     """Search all or some repositories for a user
     """
@@ -172,4 +172,4 @@ def surch_user(organization_name, config_file, string, skip, repos, user,
         search_list=list(string),
         print_result=print_result,
         organization=organization_name,
-        cloned_repos_path=cloned_repos_path)
+        cloned_repos_dir=cloned_repos_dir)

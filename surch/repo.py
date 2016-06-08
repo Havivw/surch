@@ -22,6 +22,7 @@ from time import time
 import retrying
 from tinydb import TinyDB
 
+from plugins import handler
 from . import logger, utils, constants
 
 lgr = logger.init()
@@ -32,7 +33,9 @@ class Repo(object):
             self,
             repo_url,
             search_list,
+            source=None,
             verbose=False,
+            config_file=None,
             results_dir=None,
             print_result=False,
             cloned_repo_dir=None,
@@ -44,6 +47,16 @@ class Repo(object):
         lgr.setLevel(logging.DEBUG if verbose else logging.INFO)
 
         utils.check_if_cmd_exists_else_exit('git')
+        self.config_file = config_file if config_file else None
+        self.source = handler.plugins_handle(config_file=self.config_file,
+                                             plugins_list=source)
+
+        if 'vault' in self.source:
+            vault_list = handler.vault_trigger(config_file=self.config_file)
+            conf_vars = utils.read_config_file(config_file=self.config_file)
+            vault_list = utils.merge_2_list(vault_list, conf_vars)
+            search_list = utils.merge_2_list(vault_list, search_list)
+        self.search_list = search_list
         self.print_result = print_result
         self.search_list = search_list
         self.remove_cloned_dir = remove_cloned_dir
@@ -65,10 +78,16 @@ class Repo(object):
         self.result_count = 0
 
     @classmethod
-    def init_with_config_file(cls, config_file, print_result=False,
-                              verbose=False):
-        conf_vars = utils.read_config_file(verbose=verbose,
+    def init_with_config_file(cls,
+                              config_file,
+                              source=None,
+                              verbose=False,
+                              search_list=None,
+                              print_result=False):
+        conf_vars = utils.read_config_file(source=source,
+                                           verbose=verbose,
                                            config_file=config_file,
+                                           search_list=search_list,
                                            print_result=print_result)
         return cls(**conf_vars)
 
@@ -196,7 +215,7 @@ class Repo(object):
             details, 'Date:   ', '+').strip()
         return name, email, commit_time
 
-    def search(self, search_list):
+    def search(self, search_list=None):
         search_list = search_list or self.search_list
         if len(search_list) == 0:
             lgr.error('You must supply at least one string to search for.')
@@ -222,6 +241,7 @@ class Repo(object):
 def search(
         repo_url,
         search_list,
+        source=None,
         verbose=False,
         config_file=None,
         results_dir=None,
@@ -234,11 +254,14 @@ def search(
     utils.check_if_cmd_exists_else_exit('git')
 
     if config_file:
-        repo = Repo.init_with_config_file(verbose=verbose,
+        repo = Repo.init_with_config_file(source=source,
+                                          verbose=verbose,
+                                          search_list=search_list,
                                           config_file=config_file,
                                           print_result=print_result)
     else:
         repo = Repo(
+            source=source,
             verbose=verbose,
             repo_url=repo_url,
             results_dir=results_dir,
@@ -248,4 +271,4 @@ def search(
             consolidate_log=consolidate_log,
             remove_cloned_dir=remove_cloned_dir)
 
-    repo.search(search_list=search_list)
+    repo.search()

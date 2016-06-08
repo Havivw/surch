@@ -26,9 +26,17 @@ from . import logger
 lgr = logger.init()
 
 
+def merge_2_list(list1, list2):
+    for value in list2:
+        value = value.encode('ascii')
+        list1.append(value)
+    return list1
+
+
 def read_config_file(config_file,
                      source=None,
                      verbose=False,
+                     search_list=None,
                      print_result=False,
                      is_organization=True,
                      remove_cloned_dir=False):
@@ -36,8 +44,17 @@ def read_config_file(config_file,
     """
     with open(config_file) as config:
         conf_vars = yaml.load(config.read())
+
+    search_list = search_list or []
+    try:
+        for value in search_list:
+            value = value.encode('ascii')
+            conf_vars['search_list'].append(value)
+    except KeyError:
+        search_list = search_list
     conf_vars.setdefault('source', source)
     conf_vars.setdefault('config_file', config_file)
+    conf_vars.setdefault('search_list', search_list)
     conf_vars.setdefault('print_result', print_result)
     conf_vars.setdefault('verbose', verbose)
     conf_vars.setdefault('is_organization', is_organization)

@@ -26,24 +26,23 @@ lgr = logger.init()
 
 
 class Organization(object):
-    def __init__(
-            self,
-            search_list,
-            organization,
-            source=None,
-            verbose=False,
-            git_user=None,
-            config_file=None,
-            results_dir=None,
-            git_password=None,
-            print_result=False,
-            repos_to_skip=None,
-            repos_to_check=None,
-            is_organization=True,
-            consolidate_log=False,
-            cloned_repos_dir=None,
-            remove_cloned_dir=False,
-            **kwargs):
+    def __init__(self,
+                 search_list,
+                 organization,
+                 source=None,
+                 verbose=False,
+                 git_user=None,
+                 config_file=None,
+                 results_dir=None,
+                 git_password=None,
+                 print_result=False,
+                 repos_to_skip=None,
+                 repos_to_check=None,
+                 is_organization=True,
+                 consolidate_log=False,
+                 cloned_repos_dir=None,
+                 remove_cloned_dir=False,
+                 **kwargs):
         """Surch org instance define var from CLI or config file
         """
         lgr.setLevel(logging.DEBUG if verbose else logging.INFO)
@@ -52,9 +51,14 @@ class Organization(object):
         self.config_file = config_file if config_file else None
         self.source = handler.plugins_handle(config_file=self.config_file,
                                              plugins_list=source)
+
         if 'vault' in self.source:
-            search_list = handler.vault_trigger(config_file=self.config_file)
+            vault_list = handler.vault_trigger(config_file=self.config_file)
+            conf_vars = utils.read_config_file(config_file=self.config_file)
+            vault_list = utils.merge_2_list(vault_list, conf_vars)
+            search_list = utils.merge_2_list(vault_list, search_list)
         self.search_list = search_list
+
         self.print_result = print_result
         self.organization = organization
         self.results_dir = results_dir
@@ -87,11 +91,15 @@ class Organization(object):
                               config_file,
                               source=None,
                               verbose=False,
+                              search_list=None,
                               print_result=False,
                               is_organization=True,
                               remove_cloned_dir=False):
+        source = handler.plugins_handle(config_file=config_file,
+                                        plugins_list=source)
         conf_vars = utils.read_config_file(source=source,
                                            verbose=verbose,
+                                           search_list=search_list,
                                            config_file=config_file,
                                            print_result=print_result,
                                            is_organization=is_organization,
@@ -154,7 +162,7 @@ class Organization(object):
                 repo_url_list.append(repo_data['clone_url'])
         return repo_url_list
 
-    def search(self, search_list):
+    def search(self, search_list=None):
         search_list = search_list or self.search_list
         if len(search_list) == 0:
             lgr.error('You must supply at least one string to search for.')
@@ -183,24 +191,21 @@ class Organization(object):
             utils.remove_repos_folder(path=self.cloned_repos_dir)
 
 
-def search(
-        search_list,
-        organization,
-        source=None,
-        verbose=False,
-        git_user=None,
-        config_file=None,
-        results_dir=None,
-        git_password=None,
-        print_result=False,
-        repos_to_skip=None,
-        repos_to_check=None,
-        is_organization=True,
-        cloned_repos_dir=None,
-        remove_cloned_dir=False,
-        **kwargs):
-
-    utils.check_if_cmd_exists_else_exit('git')
+def search(search_list,
+           organization,
+           source=None,
+           verbose=False,
+           git_user=None,
+           config_file=None,
+           results_dir=None,
+           git_password=None,
+           print_result=False,
+           repos_to_skip=None,
+           repos_to_check=None,
+           is_organization=True,
+           cloned_repos_dir=None,
+           remove_cloned_dir=False,
+           **kwargs):
     source = handler.plugins_handle(config_file=config_file,
                                     plugins_list=source)
 
@@ -208,6 +213,7 @@ def search(
         org = Organization.init_with_config_file(
             source=source,
             verbose=verbose,
+            search_list=search_list,
             config_file=config_file,
             print_result=print_result,
             is_organization=is_organization,
@@ -228,4 +234,4 @@ def search(
             cloned_repos_dir=cloned_repos_dir,
             remove_cloned_dir=remove_cloned_dir)
 
-    org.search(search_list=search_list)
+    org.search()
